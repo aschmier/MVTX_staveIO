@@ -1,5 +1,14 @@
-Header Version: 06
-Header Size: 40
-FEE ID: 000d
-Priority Bit: 00
-Source ID: 20
+Sensor 1: 
+Header Version: 6
+Header Size: 64
+FEE ID: 13
+Priority Bit: 0
+Source ID: 32
+Beam Counter: 0
+Orbit: 1126311164
+Trigger Type: 18579
+Pages Counter: 0
+Stop Bit: 0
+Detector Field: 0
+Pause and Recover: 0
+
