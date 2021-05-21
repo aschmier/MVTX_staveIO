@@ -1,0 +1,4 @@
+#!/bin/bash
+
+g++ hexTrans.cxx -o hexTrans
+./hexTrans
