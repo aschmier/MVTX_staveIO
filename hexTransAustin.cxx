@@ -63,14 +63,20 @@ bool checkStopBit(string str){
   string word;
   int wordNumber = 0;
   string stopBit;
+  string reserved0;
+  string reserved1;
+  string reserved2;
   while(ss >> word)
   {
+    if(wordNumber == 7)  reserved0 = word;
+    if(wordNumber == 20)  reserved1 = word;
     if(wordNumber == 27) stopBit = word;
+    if(wordNumber == 29) reserved2 = word;
     wordNumber++;
   }
   //cout << "Stop bit: " << stoi(stopBit, 0, 16) << endl;
   if(stoi(stopBit, 0, 16) == 0) return 0;
-  if(stoi(stopBit, 0, 16) == 1) return 1;
+  if(stoi(stopBit, 0, 16) == 1 && reserved0 == "00" && reserved1 == "00" && reserved2 == "00") return 1;
   else return 0;
   //else cout << "Error: Stop bit has undefined value." << endl;
 }
