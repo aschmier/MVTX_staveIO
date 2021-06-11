@@ -61,10 +61,22 @@ void printHeader(string str)
     if(wordNumber == 40)
     {
       isData = checkITSspecific(str);
-      //if(isData) do stuff
-      //else{
-      //  if(wordNumber)
-      //}
+      if(isData) cout << "Reading MVTX specific data...";
+      else
+      {
+        if(wordNumber == 67) headerVersion = word;
+        if(wordNumber == 68) headerSize = word;
+        if(wordNumber == 69 || wordNumber == 70) feeID = word + feeID;
+        if(wordNumber == 71) priorityBit = word;
+        if(wordNumber == 72) sourceID = word;
+        if(wordNumber == 77 || wordNumber == 78) beamCounter = word + beamCounter;
+        if(wordNumber == 81 || wordNumber == 82 || wordNumber == 83 || wordNumber == 84) orbit = word + orbit;
+        if(wordNumber == 87 || wordNumber == 88 || wordNumber == 89 || wordNumber == 90) triggerType = word + triggerType;
+        if(wordNumber == 91 || wordNumber == 92) pagesCounter = word + pagesCounter;
+        if(wordNumber == 93) stopBit = word;
+        if(wordNumber == 100 || wordNumber == 101 || wordNumber == 102 || wordNumber == 103) detectorField = word + detectorField;
+        if(wordNumber == 104 || wordNumber == 105) parBit = word + parBit;
+      }
     }
 
     wordNumber++;
@@ -129,6 +141,7 @@ int main () {
         tempPacket.append(singleLine);
         dataPacket.push_back(tempPacket);
         singleLine.clear();
+        tempPacket.clear();
         newPacket = false;
         continue;
       }
@@ -147,6 +160,7 @@ int main () {
 
     cout << "Sensor 1: " << endl;
     cout <<   "===================================================" << endl;
+
     for(int packetNumber=0; packetNumber < dataPacket.size(); packetNumber++){
       printHeader(dataPacket[packetNumber]);
       cout << "===================================================" << endl;
