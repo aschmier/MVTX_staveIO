@@ -6,7 +6,27 @@
 #include <vector>
 using namespace std;
 
-void printHeader(string str){
+bool checkITSspecific(string str)
+{
+  stringstream ss(str);
+  string word;
+  int wordNumber = 0;
+  bool isReserved = false;
+  bool isITSheader = false;
+
+  while(ss >> word)
+  {
+    if(wordNumber == 48 || wordNumber == 49 || wordNumber == 50 || wordNumber == 51 || wordNumber == 52 && word =="00") isReserved = true;
+    if(wordNumber == 53 && word == "e0") isITSheader = true;
+    wordNumber++;
+  }
+  if(isReserved == true && isITSheader == true) return true;
+  else return false;
+
+}
+
+void printHeader(string str)
+{
   stringstream ss(str);
   string word;
   int wordNumber = 0;
@@ -22,6 +42,7 @@ void printHeader(string str){
   string stopBit;
   string detectorField;
   string parBit;
+  bool isData = false;
 
   while(ss >> word)
   {
@@ -37,6 +58,14 @@ void printHeader(string str){
     if(wordNumber == 27) stopBit = word;
     if(wordNumber == 34 || wordNumber == 35 || wordNumber == 36 || wordNumber == 37) detectorField = word + detectorField;
     if(wordNumber == 38 || wordNumber == 39) parBit = word + parBit;
+    if(wordNumber == 40)
+    {
+      isData = checkITSspecific(str);
+      //if(isData) do stuff
+      //else{
+      //  if(wordNumber)
+      //}
+    }
 
     wordNumber++;
   }
