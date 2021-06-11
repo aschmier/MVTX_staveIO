@@ -34,6 +34,7 @@ int main () {
 
     while(ss1 >> word)
     {
+
       if(wordNumber == 1) headerVersion = word;
       if(wordNumber == 2) headerSize = word;
       if(wordNumber == 3) feeID = word;
