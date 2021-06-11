@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <vector>
 using namespace std;
 
 void printHeader(string str){
@@ -67,9 +68,11 @@ bool checkStopBit(string str){
     if(wordNumber == 27) stopBit = word;
     wordNumber++;
   }
+  //cout << "Stop bit: " << stoi(stopBit, 0, 16) << endl;
   if(stoi(stopBit, 0, 16) == 0) return 0;
   if(stoi(stopBit, 0, 16) == 1) return 1;
-  else cout << "Error: Stop bit has undefined value." << endl;
+  else return 0;
+  //else cout << "Error: Stop bit has undefined value." << endl;
 }
 
 int main () {
@@ -77,23 +80,41 @@ int main () {
   ifstream myfile ("hexdump_example.txt");
   if (myfile.is_open())
   {
-    int lineNumber = 0;
-    string sensor1;
-
+    int packetNumber = 0;
+    string singleLine;
+    string tempPacket;
+    vector<string> dataPacket;
+    bool isEnd = false;
+    bool newPacket = false;
     while ( getline (myfile,line) )
     {
-      sensor1.append(line);
-      bool isEnd = checkStopBit(sensor1);
-      if(isEnd) 
-      sensor1 += '\n';
+      singleLine.append(line);
+      if(newPacket)
+      {
+        tempPacket.append(singleLine);
+        dataPacket.push_back(tempPacket);
+        singleLine.clear();
+        newPacket = false;
+        continue;
+      }
 
-      lineNumber++;
+      isEnd = checkStopBit(singleLine);
+      if(!isEnd) tempPacket.append(singleLine);
+      if(isEnd)
+      {
+        tempPacket.append(singleLine);
+        packetNumber++;
+        newPacket = true;
+      }
+
+      singleLine.clear();
     }
-    cout << "Sensor 1: " << endl;
-    printHeader(sensor1);
 
-    if(!isEnd){
-      cout << "Reading MVTX specific data..." << endl;
+    cout << "Sensor 1: " << endl;
+    cout <<   "===================================================" << endl;
+    for(int packetNumber=0; packetNumber < dataPacket.size(); packetNumber++){
+      printHeader(dataPacket[packetNumber]);
+      cout << "===================================================" << endl;
     }
 
     myfile.close();
