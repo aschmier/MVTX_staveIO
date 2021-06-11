@@ -6,6 +6,36 @@
 #include <vector>
 using namespace std;
 
+void dataHandler(string str)
+{
+  size_t posIHW = str.find("00 00 00 00 00 e0");
+  string str2 = str.substr(posIHW-12);
+  int startITSdata = 0;
+  int endITSdata = str2.find("01 f0");
+  string itsData = str2.substr(startITSdata, (endITSdata - startITSdata)+5);
+  string IHW = itsData.substr(0,29);
+  string TDH = itsData.substr(31,60-31);
+  int startSensorData = 79;
+  int endSensorData = itsData.find("01 f0");
+  string sensorData = itsData.substr(startSensorData, (endSensorData - startSensorData) - 42);
+  string TDT = itsData.substr(endSensorData-24);
+
+  stringstream ssIHW(IHW);
+  stringstream ssTDH(TDH);
+  stringstream ssSensorData(sensorData);
+  stringstream ssTDT(TDT);
+
+  string wordIHW, wordTDH, wordSensorData, wordTDT;
+  int wn1 = 0, wn2 = 0, wn3 = 0, wn4 = 0;
+
+//  while(ssIHW >> wordIHW)
+//  {
+//    if(wordNumber == 47 || wordNumber == 48 || wordNumber == 49 || wordNumber == 50 || wordNumber == 51 && word =="00") isReserved = true;
+//    if(wordNumber == 52 && word == "e0") isITSheader = true;
+//    wordNumber++;
+//  }
+}
+
 bool checkITSspecific(string str)
 {
   stringstream ss(str);
@@ -16,7 +46,7 @@ bool checkITSspecific(string str)
 
   while(ss >> word)
   {
-    if(wordNumber == 48 || wordNumber == 49 || wordNumber == 50 || wordNumber == 51 || wordNumber == 52 && word =="00") isReserved = true;
+    if(wordNumber == 47 || wordNumber == 48 || wordNumber == 49 || wordNumber == 50 || wordNumber == 51 && word =="00") isReserved = true;
     if(wordNumber == 52 && word == "e0") isITSheader = true;
     wordNumber++;
   }
@@ -94,7 +124,11 @@ void printHeader(string str)
       cout << "Checking for MVTX specific data..." << endl;
       isData = checkITSspecific(str);
       cout << endl;
-      if(isData) cout << "MVTX data found. Reading..." << endl;
+      if(isData)
+      {
+        cout << "MVTX data found. Reading..." << endl;
+        dataHandler(str);
+      }
       else cout << "No MVTX data found. Reading closing RDH..." << endl;
 
       headerVersion.clear();
