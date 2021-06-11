@@ -40,6 +40,7 @@ void printHeader(string str){
 
     wordNumber++;
   }
+  cout<< "=======================RDH========================="<<endl;
   cout << "Header Version: " << stoi(headerVersion, 0, 16) << endl;
   cout << "Header Size: " << stoi(headerSize, 0, 16) << endl;
   cout << "FEE ID: " << stoi(feeID, 0, 16) << endl;
@@ -64,18 +65,35 @@ void printIHW(string str){
   int wordNumber = 0;
   string ActiveLanes;
   string IHWid;
+
+
+  while(ss >> word){
+    if(wordNumber == 43||wordNumber==44||wordNumber ==45) ActiveLanes = word +ActiveLanes;
+    else if(wordNumber ==52) IHWid = word + IHWid;
+  //cout << word << "\t"<<wordNumber<<"\n";
+     wordNumber++;
+  }
+  cout<< "=======================IHW========================="<<endl;
+  cout << "Active lanes: " << stoi(ActiveLanes, 0, 16) << endl;
+  cout << "ITS Header Word ID: " << stoi(IHWid, 0, 16) << endl;
+
+  //if(stoi(stopBit, 0, 16) == 0) return 0;
+  //if(stoi(stopBit, 0, 16) == 1) return 1;
+  //else cout << "Error: Stop bit has undefined value." << endl;
+}
+
+void printTDH(string str){
+  stringstream ss(str);
+  string word;
+  int wordNumber = 0;
   string TriggerID;
   string TriggerType;
   string TriggerBC;
   string TriggerOrbit;
   string InternalTrigger;
   string temp;
-
-  cout<< "=======================IHW========================="<<endl;
   while(ss >> word){
-    if(wordNumber == 43||wordNumber==44||wordNumber ==45) ActiveLanes = word +ActiveLanes;
-    else if(wordNumber ==52) IHWid = word + IHWid;
-    else if(wordNumber == 53) temp = word;
+    if(wordNumber == 53) temp = word;
     else if(wordNumber == 54) {
       TriggerType = word.substr(1)+temp;
       InternalTrigger = word.substr(0,1);
@@ -87,23 +105,91 @@ void printIHW(string str){
 
    wordNumber++;
   }
-
-  cout << "Active lanes: " << stoi(ActiveLanes, 0, 16) << endl;
-  cout << "ITS Header Word ID: " << stoi(IHWid, 0, 16) << endl;
   cout<< "=======================TDH========================="<<endl;
   cout << "ID: " << stoi(TriggerID, 0, 16) << endl;
   cout << "Orbit: " << stoi(TriggerOrbit, 0, 16) << endl;
-
-  cout << "Bunch Crossing:"  << stoi(TriggerBC, 0, 16) << endl;
+  cout << "Bunch Crossing: "  << stoi(TriggerBC, 0, 16) << endl;
   cout << "Int. Trigger/Continuation: " << stoi(InternalTrigger, 0, 16) << endl;
   cout << "Type: " << stoi(TriggerType, 0, 16) << endl;
-  //if(stoi(stopBit, 0, 16) == 0) return 0;
-  //if(stoi(stopBit, 0, 16) == 1) return 1;
-  //else cout << "Error: Stop bit has undefined value." << endl;
 }
 
+void printDATA(string str){
+  stringstream ss(str);
+  string word;
+  int wordNumber = 0;
+  string line1;
+  string line2;
+  string line3;
+  string linetitle;
+  string datatype;
+  string datalineend;
+  cout<< "=======================DATA========================"<<endl;
+ while(ss >> word){
+
+     if(wordNumber == 65) linetitle = word;
+     if(wordNumber == 66) datatype =word;
+     if(wordNumber == 67||wordNumber == 68||wordNumber == 69||wordNumber == 70||wordNumber == 71||wordNumber == 72||wordNumber == 73) line1=word+line1;
+     if(wordNumber == 74) {
+       datalineend=word;
+       cout<< "Sensor: " << linetitle <<endl;
+       cout << "Data Type: " << datatype<<endl;
+       cout<< "Readout: " << line1<< endl;
+       cout<< "End word: " << datalineend <<endl;
+       cout<< "--------------------------------------------------\n";
+     }
+
+     if(wordNumber == 75) linetitle = word;
+     if(wordNumber == 76) datatype =word;
+     if(wordNumber == 77||wordNumber == 78||wordNumber == 79||wordNumber == 80||wordNumber == 81||wordNumber == 82||wordNumber == 83) line2=word+line2;
+     if(wordNumber == 84) {
+       datalineend=word;
+       cout<< "Sensor: " << linetitle <<endl;
+       cout << "Data Type: " << datatype<<endl;
+       cout<< "Readout: " << line2<< endl;
+       cout<< "End word: " << datalineend <<endl;
+       cout<< "--------------------------------------------------\n";
+     }
+     if(wordNumber == 85) linetitle = word;
+     if(wordNumber == 86) datatype =word;
+     if(wordNumber == 87||wordNumber==88||wordNumber == 89||wordNumber == 90||wordNumber == 91||wordNumber == 92||wordNumber == 93) line3=word+line3;
+     if(wordNumber == 94) {
+       datalineend=word;
+       cout<< "Sensor: " << linetitle <<endl;
+       cout << "Data Type: " << datatype<<endl;
+       cout<< "Readout: " << line3<< endl;
+       cout<< "End word: " << datalineend <<endl;
+       cout<< "--------------------------------------------------\n";
+     }
+     wordNumber++;
 
 
+
+
+
+}
+}
+void printTDT(string str){
+  stringstream ss(str);
+  string word;
+  int wordNumber = 0;
+  string tID;
+  string stop;
+  string readout;
+
+  cout<< "=======================TDT========================"<<endl;
+ while(ss >> word){
+   if(wordNumber==106||wordNumber ==105) tID =word+tID;
+   if (wordNumber==104) stop = word.substr(1);
+   if(wordNumber == 102||wordNumber == 101||wordNumber == 100||wordNumber == 99||wordNumber == 98||wordNumber == 97) readout =word+readout;
+
+   wordNumber++;
+ }
+ cout<< "ID: " << stoi(tID,0,16) <<endl;
+ cout << "STOP: " << stoi(stop,0,16) <<endl;
+ cout<< "Readout: " << readout<< endl;
+
+
+}
 bool checkStopBit(string str){
   stringstream ss(str);
   string word;
@@ -146,6 +232,7 @@ int main () {
         tempPacket.append(singleLine);
         dataPacket.push_back(tempPacket);
         singleLine.clear();
+          tempPacket.clear();
         newPacket = false;
         continue;
       }
@@ -167,7 +254,9 @@ int main () {
     for(int packetNumber=0; packetNumber < dataPacket.size(); packetNumber++){
       printHeader(dataPacket[packetNumber]);
       printIHW(dataPacket[packetNumber]);
-      //printTDH(dataPacket[packetNumber]);
+      printTDH(dataPacket[packetNumber]);
+      printDATA(dataPacket[packetNumber]);
+      printTDT(dataPacket[packetNumber]);
       cout << "===================================================" << endl;
     }
 
