@@ -21,19 +21,91 @@ void dataHandler(string str)
   string TDT = itsData.substr(endSensorData-24);
 
   stringstream ssIHW(IHW);
-  stringstream ssTDH(TDH);
   stringstream ssSensorData(sensorData);
   stringstream ssTDT(TDT);
 
   string wordIHW, wordTDH, wordSensorData, wordTDT;
-  int wn1 = 0, wn2 = 0, wn3 = 0, wn4 = 0;
+  int nIHW = 0, nSD = 0, nTDT = 0;
+  string IHWid, activeLanes;
 
-//  while(ssIHW >> wordIHW)
-//  {
-//    if(wordNumber == 47 || wordNumber == 48 || wordNumber == 49 || wordNumber == 50 || wordNumber == 51 && word =="00") isReserved = true;
-//    if(wordNumber == 52 && word == "e0") isITSheader = true;
-//    wordNumber++;
-//  }
+  // ITS Header Word
+
+  while(ssIHW >> wordIHW)
+  {
+    if(nIHW == 0 || nIHW == 1 || nIHW == 2 || nIHW == 3) activeLanes = wordIHW;
+    if(nIHW == 9) IHWid = wordIHW;
+    nIHW++;
+  }
+
+  // Trigger Data Header
+
+  string TT = TDH.substr(0,4), triggerType, wordTT;
+  string ITC = TDH.substr(4,1);
+  string TBC = TDH.substr(6,4), triggerBC, wordBC;
+  string TO = TDH.substr(12,11), triggerOrbit, wordOrbit;
+  string TDHid = TDH.substr(27,2);
+  stringstream ssTT(TT);
+  stringstream ssBC(TBC);
+  stringstream ssOrbit(TO);
+  int nTT=0, nBC=0, nO=0;
+
+  while(ssTT >> wordTT)
+  {
+    if(nTT == 0 || nTT == 1) triggerType = wordTT + triggerType;
+    nTT++;
+  }
+
+  while(ssOrbit >> wordOrbit)
+  {
+    if(nO == 0 || nO == 1 || nO == 2 || nO == 3) triggerOrbit = wordOrbit + triggerOrbit;
+    nO++;
+  }
+
+  while(ssBC >> wordBC)
+  {
+    if(nBC == 0 || nBC == 1) triggerBC = wordBC + triggerBC;
+    nBC++;
+  }
+
+  // ITS Sensor Data
+  string lane1 = sensorData.substr(0, 29);
+  string lane2 = sensorData.substr(31, 29);
+  string lane3 = sensorData.substr(62, 29);
+
+  // Trigger Data Trailer
+  string laneStatus, TDTerror, TDTid;
+
+  while(ssTDT >> wordTDT)
+  {
+    if(nTDT == 0 || nTDT == 1 || nTDT == 2 || nTDT == 3 || nTDT == 4 || nTDT == 5 || nTDT == 6) laneStatus = wordTDT + laneStatus;
+    if(nTDT == 8) TDTerror = wordTDT + TDTerror;
+    if(nTDT == 9) TDTid = wordTDT + TDTid;
+    nTDT++;
+  }
+
+  cout << "========== MVTX Header Word ==========" << endl;
+  cout << "Header word identifier: " << IHWid << endl;
+  cout << "Active lanes: " << stoi(activeLanes, 0, 16) << endl;
+  cout << endl;
+
+  cout << "========= Trigger Data Header ========" << endl;
+  cout << "TDH identifier: " << TDHid << endl;
+  cout << "Trigger type: " << stoi(triggerType, 0, 16) << endl;
+  cout << "Internal trigger, no data, and continuation: " << stoi(ITC, 0, 16) << endl;
+  cout << "Trigger bunch crossing: " << stoi(triggerBC, 0, 16) << endl;
+  cout << "Trigger orbit: " << stoi(triggerOrbit, 0, 16) << endl;
+  cout << endl;
+
+  cout << "========== MVTX Sensor Data ==========" << endl;
+  cout << "Lane 1: " << lane1 << endl;
+  cout << "Lane 2: " << lane2 << endl;
+  cout << "Lane 3: " << lane3 << endl;
+  cout << endl;
+
+  cout << "======== Trigger Data Trailer ========" << endl;
+  cout << "TDT identifier:" << TDTid << endl;
+  cout << "Lane status: " << laneStatus << endl;
+  cout << "Errors: " << TDTerror << endl;
 }
 
 bool checkITSspecific(string str)
@@ -58,6 +130,7 @@ bool checkITSspecific(string str)
 void printOut(string headerVersion, string headerSize, string feeID, string priorityBit, string sourceID, string beamCounter,
               string orbit, string triggerType, string pagesCounter, string stopBit, string detectorField, string parBit)
 {
+  cout << "========== Raw Data Header ===========" << endl;
   cout << "Header Version: " << stoi(headerVersion, 0, 16) << endl;
   cout << "Header Size: " << stoi(headerSize, 0, 16) << endl;
   cout << "FEE ID: " << stoi(feeID, 0, 16) << endl;
@@ -121,15 +194,17 @@ void printHeader(string str)
     {
       printOut(headerVersion, headerSize, feeID, priorityBit, sourceID, beamCounter,
                orbit, triggerType, pagesCounter, stopBit, detectorField, parBit);
+      cout << endl;
       cout << "Checking for MVTX specific data..." << endl;
       isData = checkITSspecific(str);
-      cout << endl;
       if(isData)
       {
         cout << "MVTX data found. Reading..." << endl;
+        cout << endl;
         dataHandler(str);
       }
       else cout << "No MVTX data found. Reading closing RDH..." << endl;
+      cout << endl;
 
       headerVersion.clear();
       headerSize.clear();
@@ -230,9 +305,10 @@ int main () {
     cout <<   "===================================================" << endl;
 
     for(int packetNumber=0; packetNumber < dataPacket.size(); packetNumber++){
+      cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
       cout << "Reading RDH for packet " << packetNumber+1 << " of " << dataPacket.size() << endl;
+      cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++" << endl;
       printHeader(dataPacket[packetNumber]);
-      cout << "===================================================" << endl;
     }
 
     myfile.close();

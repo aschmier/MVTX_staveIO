@@ -1,0 +1,199 @@
+Sensor 1: 
+===================================================
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Reading RDH for packet 1 of 5
++++++++++++++++++++++++++++++++++++++++++++++++++++
+========== Raw Data Header ===========
+Header Version: 6
+Header Size: 64
+FEE ID: 13
+Priority Bit: 0
+Source ID: 32
+Beam Counter: 0
+Orbit: 1126311164
+Trigger Type: 18579
+Pages Counter: 0
+Stop Bit: 0
+Detector Field: 0
+Pause and Recover: 0
+
+Checking for MVTX specific data...
+MVTX data found. Reading...
+
+========== MVTX Header Word ==========
+Header word identifier: e0
+Active lanes: 0
+
+========= Trigger Data Header ========
+TDH identifier: 8
+Trigger type: 147
+Internal trigger, no data, and continuation: 8
+Trigger bunch crossing: 0
+Trigger orbit: 1126311164
+
+========== MVTX Sensor Data ==========
+Lane 1: e0 ac 00 00 00 00 00 00 00 20
+Lane 2: e1 ac 00 00 00 00 00 00 00 21
+Lane 3: e2 ac 00 00 00 00 00 00 00 22
+
+======== Trigger Data Trailer ========
+TDT identifier:f0
+Lane status: 00000000000000
+Errors: 01
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Reading RDH for packet 2 of 5
++++++++++++++++++++++++++++++++++++++++++++++++++++
+========== Raw Data Header ===========
+Header Version: 6
+Header Size: 64
+FEE ID: 13
+Priority Bit: 0
+Source ID: 32
+Beam Counter: 0
+Orbit: 1126311165
+Trigger Type: 16403
+Pages Counter: 0
+Stop Bit: 0
+Detector Field: 0
+Pause and Recover: 0
+
+Checking for MVTX specific data...
+MVTX data found. Reading...
+
+========== MVTX Header Word ==========
+Header word identifier: e0
+Active lanes: 0
+
+========= Trigger Data Header ========
+TDH identifier: 8
+Trigger type: 19
+Internal trigger, no data, and continuation: 0
+Trigger bunch crossing: 0
+Trigger orbit: 1126311165
+
+========== MVTX Sensor Data ==========
+Lane 1: e2 ac 00 00 00 00 00 00 00 22
+Lane 2: e0 ac 00 00 00 00 00 00 00 20
+Lane 3: e1 ac 00 00 00 00 00 00 00 21
+
+======== Trigger Data Trailer ========
+TDT identifier:f0
+Lane status: 00000000000000
+Errors: 01
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Reading RDH for packet 3 of 5
++++++++++++++++++++++++++++++++++++++++++++++++++++
+========== Raw Data Header ===========
+Header Version: 6
+Header Size: 64
+FEE ID: 13
+Priority Bit: 0
+Source ID: 32
+Beam Counter: 0
+Orbit: 1126311167
+Trigger Type: 18451
+Pages Counter: 0
+Stop Bit: 0
+Detector Field: 0
+Pause and Recover: 0
+
+Checking for MVTX specific data...
+MVTX data found. Reading...
+
+========== MVTX Header Word ==========
+Header word identifier: e0
+Active lanes: 0
+
+========= Trigger Data Header ========
+TDH identifier: 8
+Trigger type: 19
+Internal trigger, no data, and continuation: 8
+Trigger bunch crossing: 0
+Trigger orbit: 1126311167
+
+========== MVTX Sensor Data ==========
+Lane 1: e1 ac 00 00 00 00 00 00 00 21
+Lane 2: e2 ac 00 00 00 00 00 00 00 22
+Lane 3: e0 ac 00 00 00 00 00 00 00 20
+
+======== Trigger Data Trailer ========
+TDT identifier:f0
+Lane status: 00000000000000
+Errors: 01
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Reading RDH for packet 4 of 5
++++++++++++++++++++++++++++++++++++++++++++++++++++
+========== Raw Data Header ===========
+Header Version: 6
+Header Size: 64
+FEE ID: 13
+Priority Bit: 0
+Source ID: 32
+Beam Counter: 0
+Orbit: 1126311168
+Trigger Type: 16403
+Pages Counter: 0
+Stop Bit: 0
+Detector Field: 0
+Pause and Recover: 0
+
+Checking for MVTX specific data...
+MVTX data found. Reading...
+
+========== MVTX Header Word ==========
+Header word identifier: e0
+Active lanes: 0
+
+========= Trigger Data Header ========
+TDH identifier: 8
+Trigger type: 19
+Internal trigger, no data, and continuation: 0
+Trigger bunch crossing: 0
+Trigger orbit: 1126311168
+
+========== MVTX Sensor Data ==========
+Lane 1: e0 ac 00 00 00 00 00 00 00 20
+Lane 2: e1 ac 00 00 00 00 00 00 00 21
+Lane 3: e2 ac 00 00 00 00 00 00 00 22
+
+======== Trigger Data Trailer ========
+TDT identifier:f0
+Lane status: 00000000000000
+Errors: 01
+
++++++++++++++++++++++++++++++++++++++++++++++++++++
+Reading RDH for packet 5 of 5
++++++++++++++++++++++++++++++++++++++++++++++++++++
+========== Raw Data Header ===========
+Header Version: 6
+Header Size: 64
+FEE ID: 13
+Priority Bit: 0
+Source ID: 32
+Beam Counter: 0
+Orbit: 1126311737
+Trigger Type: 18691
+Pages Counter: 0
+Stop Bit: 0
+Detector Field: 0
+Pause and Recover: 0
+
+Checking for MVTX specific data...
+No MVTX data found. Reading closing RDH...
+
+========== Raw Data Header ===========
+Header Version: 6
+Header Size: 64
+FEE ID: 13
+Priority Bit: 0
+Source ID: 32
+Beam Counter: 0
+Orbit: 1126311737
+Trigger Type: 18691
+Pages Counter: 1
+Stop Bit: 1
+Detector Field: 0
+Pause and Recover: 0
