@@ -1,0 +1,16 @@
+////////////////////////////////////////////
+// Translation macro for FELIX hex output //
+//                                        //
+// Written by Austin Schmier              //
+// for sPHENIX MVTX testing purposes      //
+// aschmier@vols.utk.edu                  //
+////////////////////////////////////////////
+
+
+
+Usage:
+./runTranslate.sh inputfile outputfile
+
+
+Use a raw data file as input. This macro will do a hexdump, so there is no need to do this first.
+Please feel free to email me with any questions or issues.
