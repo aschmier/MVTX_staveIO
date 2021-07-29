@@ -1,3 +1,0 @@
-#!/bin/bash
-
-hexdump -v -e '10/1 "%02x " "\n" 10/1 "%02x " "\n" 10/1 "%02x " "  "  2/1 "%02x " "\n"' test0005-210513-151104-1.dat | grep -B 2 "01$" --no-group-separator | less
