@@ -9,8 +9,10 @@
 
 
 Usage:
-./runTranslate.sh inputfile outputfile
+./runEventDump.sh inputfile sensor outputfile
 
+Example:
+./runEventDump.sh "rawData/test0065-210810-114740-1.dat" "2" "out.txt"
 
-Use a raw data file as input. This macro will do a hexdump, so there is no need to do this first.
+Use a raw data file as input.
 Please feel free to email me with any questions or issues.
