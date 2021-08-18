@@ -134,24 +134,24 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
     stringstream TDH_id;
     stringstream tdh_gtm_bco;
     stringstream tdh_lhc_bc;
-    stringstream tdh_error;
+    stringstream tdh_status;
     stringstream tdh_trigger_type;
 
     TDH_id           << hex << vec[9].to_ulong();
     tdh_gtm_bco      << hex << vec[8].to_ulong() << vec[7].to_ulong() << vec[6].to_ulong() << vec[5].to_ulong() << vec[4].to_ulong();
     tdh_lhc_bc       << hex << vec[3].to_ulong() << vec[2].to_ulong();
-    tdh_error        << vec[1];
+    tdh_status        << vec[1];
     tdh_trigger_type << vec[1] << vec[0];
 
     cout << "TDH_id: "           << TDH_id.str()      << " // ";
     cout << "tdh_gtm_bco: "      << tdh_gtm_bco.str() << " // ";
     cout << "tdh_lhc_bc: "       << tdh_lhc_bc.str()  << " // ";
 
-    string tdh_error_split = tdh_error.str().substr(0,4);
-    cout << "tdh_error: "        << tdh_error_split;
-    if((int)tdh_error_split.at(3) - '0' == 1) cout << " Internal Trigger";
-    if((int)tdh_error_split.at(2) - '0' == 1) cout << " No Data";
-    if((int)tdh_error_split.at(1) - '0' == 1) cout << " Continuation";
+    string tdh_status_split = tdh_status.str().substr(0,4);
+    cout << "tdh_status: "        << tdh_status_split;
+    if((int)tdh_status_split.at(3) - '0' == 1) cout << " Internal Trigger";
+    if((int)tdh_status_split.at(2) - '0' == 1) cout << " No Data";
+    if((int)tdh_status_split.at(1) - '0' == 1) cout << " Continuation";
     cout << " // ";
 
     string tdh_trigger_type_split = tdh_trigger_type.str().substr(4);
@@ -265,7 +265,7 @@ int main(int argc, char *argv[]){
     vector<uint8_t> vBuf(32);
     int line_number = 0;
     while (binFile.good()) {
-      if(line_number == 7) line_number = 0;
+      //if(line_number == 7) line_number = 0;
 
       if( binFile.read((char *)&vBuf[0], vBuf.size() ) ){
         if( ((bitset<8>)vBuf[vBuf.size()-1]).to_ulong() != sensor ){
