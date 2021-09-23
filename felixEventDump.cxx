@@ -6,8 +6,59 @@
 #include <bitset>
 using namespace std;
 
-void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
-  cout << "   | ";
+void readMSD(vector<bitset<8>> sensor_data){
+  for(int i = 0; i < sensor_data.size(); i++){
+    if(sensor_data.at(i).to_string().substr(0,4) == "0010"){ sensor_data.erase(sensor_data.begin()+i); i--; }
+  }
+
+  for(int i = 0; i < sensor_data.size(); i++){
+    if(sensor_data.at(i).to_string() == "11111111") cout << "IDLE:             " << hex << sensor_data.at(i).to_ulong() << " ";
+    if(sensor_data.at(i).to_string() == "11110001") cout << "BUSY ON:          " << hex << sensor_data.at(i).to_ulong() << " ";
+    if(sensor_data.at(i).to_string() == "11110000") cout << "BUSY OFF:         " << hex << sensor_data.at(i).to_ulong() << " ";
+    if(sensor_data.at(i).to_string().substr(0,4) == "1011"){
+      cout << "Chip Trailer:     " << hex << sensor_data.at(i).to_ulong() << "     -> ";
+      cout << "Readout Flags: " << hex << bitset<8>(sensor_data.at(i).to_string().substr(4,4)).to_ulong() << " ";
+      break;
+    }
+    if(sensor_data.at(i).to_string().substr(0,3) == "110"){
+      cout << "Region Header:    " << hex << sensor_data.at(i).to_ulong() << "     -> ";
+      cout << "Region ID:     " << hex << bitset<8>(sensor_data.at(i).to_string().substr(3,5)).to_ulong() << " ";
+    }
+    if(sensor_data.at(i).to_string().substr(0,4) == "1010"){
+      if(i >= sensor_data.size()-2) continue;
+      cout << "Chip Header:      " << hex << sensor_data.at(i).to_ulong() << " " << sensor_data.at(i+1).to_ulong() << "  -> ";
+      cout << "Bunch Counter: " << hex << bitset<8>(sensor_data.at(i).to_string().substr(4,4)).to_ulong() << bitset<8>(sensor_data.at(i+1).to_string()).to_ulong();
+      if(i < sensor_data.size()-2) i++;
+    }
+    if(sensor_data.at(i).to_string().substr(0,4) == "1110"){
+      if(i >= sensor_data.size()-2) continue;
+      cout << "Chip Empty Frame: " << hex << sensor_data.at(i).to_ulong() << " " << sensor_data.at(i+1).to_ulong() << "     -> ";
+      cout << "Bunch Counter: " << hex << bitset<8>(sensor_data.at(i).to_string().substr(4,4)).to_ulong() << bitset<8>(sensor_data.at(i+1).to_string()).to_ulong();
+      if(i < sensor_data.size()-2) i++;
+    }
+    if(sensor_data.at(i).to_string().substr(0,2) == "01"){
+      if(i >= sensor_data.size()-2) continue;
+      cout << "Data Short:       " << hex << sensor_data.at(i).to_ulong() << " " << sensor_data.at(i+1).to_ulong() << "     -> ";
+      string dsBin = sensor_data.at(i).to_string() + sensor_data.at(i+1).to_string();
+      cout << "Encoder ID:    " << hex << bitset<8>(dsBin.substr(2,4)).to_ulong() << " // ";
+      cout << "Address:       " << hex << bitset<8>(dsBin.substr(6,10)).to_ulong() << " ";
+      if(i < sensor_data.size()-2) i++;
+    }
+    if(sensor_data.at(i).to_string().substr(0,2) == "00"){
+      if(i >= sensor_data.size()-3) continue;
+      cout << "Data Long:        " << hex << sensor_data.at(i).to_ulong() << " " << sensor_data.at(i+1).to_ulong() << " " << sensor_data.at(i+2).to_ulong() << " -> ";
+      string dlBin = sensor_data.at(i).to_string() + sensor_data.at(i+1).to_string() + sensor_data.at(i+2).to_string();
+      cout << "Encoder ID:    " << hex << bitset<8>(dlBin.substr(2,4)).to_ulong() << " // ";
+      cout << "Address: " << hex << bitset<8>(dlBin.substr(6,10)).to_ulong() << " // ";
+      cout << "Hit Map: " << hex << bitset<8>(dlBin.substr(17,7)).to_ulong() << " ";
+      if(i < sensor_data.size()-3) i+=2;
+    }
+    cout << endl;
+  }
+}
+
+void wordHandler(int word_number, vector<bitset<8>> vec, bool& MSDpacket, vector<bitset<8>>& lane0data, vector<bitset<8>>& lane1data, vector<bitset<8>>& lane2data){
+  if(!MSDpacket)cout << "   | ";
   bool isRDH = false;
   bool isIHW = false;
   bool isTDH = false;
@@ -16,49 +67,40 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
   bool isCDW = false;
   bool isMSD = false;
 
-  stringstream check_rdh;
-  stringstream check_data;
-  stringstream check_msd;
-  check_rdh  << hex << vec[1].to_ulong() << vec[5].to_ulong();
-  check_data << hex << vec[vec.size()-1].to_ulong();
-  check_msd  << hex << vec[0].to_ulong();
+  stringstream check_word;
 
-  if(check_rdh.str().substr(0,2) == "40" && check_rdh.str().substr(2,2) == "20") isRDH = true;
-  if(check_data.str() == "e0") isIHW = true;
-  if(check_data.str() == "e8") isTDH = true;
-  if(check_data.str() == "f0") isTDT = true;
-  if(check_data.str() == "e4") isDDW = true;
-  if(check_data.str() == "f8") isCDW = true;
-  if(check_msd.str()  == "e0" || check_msd.str() == "e1" || check_msd.str() == "e2" ||
-      check_msd.str() == "e3" || check_msd.str() == "e4" || check_msd.str() == "e5" ||
-      check_msd.str() == "e6" || check_msd.str() == "e7" || check_msd.str() == "e8") isMSD = true;
+  check_word << hex << vec[9].to_ulong();
 
-  if(line_number == 1 && word_number == 1 && check_data.str() == "0")  cout << "End of data";
-
-  if(line_number != 0 && isRDH) cout << "RDH repeat...";
+  if(check_word.str()  == "0") isRDH = true;
+  if(check_word.str() == "e0") isIHW = true;
+  if(check_word.str() == "e8") isTDH = true;
+  if(check_word.str() == "f0") isTDT = true;
+  if(check_word.str() == "e4") isDDW = true;
+  if(check_word.str() == "f8") isCDW = true;
+  if(check_word.str().substr(0,1)  == "2" && (int)check_word.str().at(0) -'0' > -1 && (int)check_word.str().at(0) - '0' < 9) isMSD = true;
 
   // Raw Data Header
-  if(line_number == 0 && word_number == 0){
+  if(isRDH && word_number == 0){
     stringstream header_version;
     stringstream header_size;
     stringstream fee_id;
-    stringstream priority_bit;
     stringstream source_id;
+    stringstream detector_field;
 
     header_version << hex << vec[0].to_ulong();
     header_size    << hex << vec[1].to_ulong();
     fee_id         << hex << vec[3].to_ulong() + vec[2].to_ulong();
-    priority_bit   << hex << vec[4].to_ulong();
-    source_id      << hex << vec[5].to_ulong();
+    source_id      << hex << vec[4].to_ulong();
+    detector_field << hex << vec[8].to_ulong() + vec[7].to_ulong() + vec[6].to_ulong() + vec[5].to_ulong();
 
     cout << "header_version: " << header_version.str() << " // ";
     cout << "header_size: "    << header_size.str()    << " // ";
     cout << "fee_id: "         << fee_id.str()         << " // ";
-    cout << "priority_bit: "   << priority_bit.str()   << " // ";
-    cout << "source_id: "      << source_id.str();
+    cout << "source_id: "      << source_id.str()      << " // ";
+    cout << "detector_field: " << detector_field.str();
   }
 
-  if(line_number == 0 && word_number == 1){
+  if(isRDH && word_number == 1){
     stringstream lhc_bc;
     stringstream gtm_bco;
 
@@ -69,16 +111,18 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
     cout << "gtm_bco: " << gtm_bco.str();
   }
 
-  if(line_number == 0 && word_number == 2){
+  if(isRDH && word_number == 2){
     stringstream trigger_type;
     stringstream pages_counter;
     stringstream stop_bit;
+    stringstream priority_bit;
 
     trigger_type  << vec[3] << vec[2] << vec[1] << vec[0];
     pages_counter << hex << vec[5].to_ulong() << vec[4].to_ulong();
     stop_bit      << hex << vec[6].to_ulong();
+    priority_bit  << hex << vec[7].to_ulong();
 
-    cout << "trigger_type: "   << trigger_type.str();
+    cout << "trigger_type:";
 
     if((int)trigger_type.str().at(31) - '0' == 1) cout << " ORBIT";
     if((int)trigger_type.str().at(30) - '0' == 1) cout << " HB";
@@ -103,18 +147,8 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
 
     cout << " // ";
     cout << "pages_counter: "  << pages_counter.str() << " // ";
-    cout << "stop_bit: "       << stop_bit.str();
-  }
-
-  if(line_number == 1 && word_number == 0){
-    stringstream detector_field;
-    stringstream par_bit;
-
-    detector_field << hex << vec[3].to_ulong() << vec[2].to_ulong() << vec[1].to_ulong() << vec[0].to_ulong();
-    par_bit        << hex << vec[5].to_ulong() << vec[4].to_ulong();
-
-    cout << "detector_field: "  << detector_field.str() << " // ";
-    cout << "par_bit: "         << par_bit.str();
+    cout << "stop_bit: "       << stop_bit.str()      << " // ";
+    cout << "priority_bit: "   << priority_bit.str();
   }
 
   // ITS Header Word
@@ -123,7 +157,7 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
     stringstream active_lanes;
 
     IHW_id       << hex << vec[9].to_ulong();
-    active_lanes << vec[0];
+    active_lanes << vec[1] + vec[0];
 
     cout << "IHW_id: "       << IHW_id.str() << " // ";
     cout << "active_lanes: " << active_lanes.str();
@@ -155,7 +189,7 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
     cout << " // ";
 
     string tdh_trigger_type_split = tdh_trigger_type.str().substr(4);
-    cout << "tdh_trigger_type: " << tdh_trigger_type_split;
+    cout << "tdh_trigger_type:";
     if((int)tdh_trigger_type_split.at(11) - '0' == 1) cout << " ORBIT";
     if((int)tdh_trigger_type_split.at(10) - '0' == 1) cout << " HB";
     if((int)tdh_trigger_type_split.at(9)  - '0' == 1) cout << " HBr";
@@ -181,16 +215,22 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
     tdt_lane_status << vec[6] << vec[5] << vec[4] << vec[3] << vec[2] << vec[1] << vec[0];
 
     cout << "TDT_id: "          << TDT_id.str()    << " // ";
-    cout << "tdt_error: "       << tdt_error.str();
+    cout << "tdt_error: ";
     if((int)tdt_error.str().at(7) - '0' == 1) cout << " lane_starts_violation";
     if((int)tdt_error.str().at(5) - '0' == 1) cout << " transmission_timeout";
     if((int)tdt_error.str().at(4) - '0' == 1) cout << " packet_done";
     cout << " // ";
 
-    cout << "tdt_lane_status: " << tdt_lane_status.str();
-    //if((int)tdt_error.at(7) - '0' == 1) cout << " lane_starts_violation";
-    //if((int)tdt_error.at(5) - '0' == 1) cout << " transmission_timeout";
-    //if((int)tdt_error.at(4) - '0' == 1) cout << " packet_done";
+    cout << "tdt_lane_status: ";
+    string lane_status_string = tdt_lane_status.str();
+    bool lsError = false;
+    for(int i = 0; i < lane_status_string.length(); i+=2){
+      if(lane_status_string.substr(i,2) == "01"){ cout << "WARNING: Lane " << i; lsError = true; }
+      if(lane_status_string.substr(i,2) == "10"){ cout << "ERROR: Lane " << i; lsError = true; }
+      if(lane_status_string.substr(i,2) == "11"){ cout << "FAULT: Lane " << i; lsError = true; }
+    }
+    if(!lsError) cout << "OK";
+    else lsError = false;
   }
 
   // Diagnostic Data Word
@@ -214,7 +254,17 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
     if((int)ddw_error_split.at(2)  - '0' == 1) cout << " transmission_timeout";
     cout << " // ";
 
-    cout << "ddw_lane_status: " << ddw_lane_status.str();
+    cout << "ddw_lane_status: ";
+    string lane_status_string = ddw_lane_status.str();
+    bool lsError = false;
+    for(int i = 0; i < lane_status_string.length(); i+=2){
+      if(lane_status_string.substr(i,2) == "01"){ cout << "WARNING: Lane " << i; lsError = true; }
+      if(lane_status_string.substr(i,2) == "10"){ cout << "ERROR: Lane " << i; lsError = true; }
+      if(lane_status_string.substr(i,2) == "11"){ cout << "FAULT: Lane " << i; lsError = true; }
+    }
+    if(!lsError) cout << "OK";
+    else lsError = false;
+    cout << endl << endl << "------------------------------------------------------------------" << endl;
   }
 
   // Calibration Data Word
@@ -234,20 +284,22 @@ void wordHandler(int word_number, int line_number, vector<bitset<8>> vec){
 
   // MAP Sensor Data
   if(isMSD){
-    /*
-    stringstream CDW_id;
-    stringstream cdw_index;
-    stringstream cdw_user_fields;
+    stringstream MSDword;
+    MSDword << hex << vec[0].to_ulong();
+    if(MSDword.str().substr(0,1)  == "a" && word_number == 0){ MSDpacket = true; cout << "Begin sensor data..." << endl; }
 
-    CDW_id          << hex << vec[9].to_ulong();
-    cdw_index       << hex << vec[8].to_ulong() << vec[7].to_ulong() << vec[6].to_ulong();
-    cdw_user_fields << hex << vec[5].to_ulong() << vec[4].to_ulong() << vec[3].to_ulong() << vec[2].to_ulong() << vec[1].to_ulong() << vec[0].to_ulong();
+    if(MSDpacket){
+      for(int i = 0; i < vec.size(); i++){
+        if(word_number == 0) lane0data.push_back(vec.at(i));
+        if(word_number == 1) lane1data.push_back(vec.at(i));
+        if(word_number == 2) lane2data.push_back(vec.at(i));
+      }
+    }
 
-    cout << "CDW_id: "          << CDW_id.str()    << " // ";
-    cout << "cdw_index: "       << cdw_index.str() << " // ";
-    cout << "cdw_user_fields: " << cdw_user_fields.str();
-    */
-    cout << "MAP sensor data...";
+    for(int i = 0; i < vec.size(); i++){
+      if(vec.at(i).to_string() == "10110000" && word_number == 2) MSDpacket = false;
+    }
+
   }
 }
 
@@ -264,9 +316,11 @@ int main(int argc, char *argv[]){
   {
     vector<uint8_t> vBuf(32);
     int line_number = 0;
+    bool MSDpacket = false;
+    vector<bitset<8>> lane0data;
+    vector<bitset<8>> lane1data;
+    vector<bitset<8>> lane2data;
     while (binFile.good()) {
-      //if(line_number == 7) line_number = 0;
-
       if( binFile.read((char *)&vBuf[0], vBuf.size() ) ){
         if( ((bitset<8>)vBuf[vBuf.size()-1]).to_ulong() != sensor ){
           if( ((bitset<8>)vBuf[vBuf.size()-1]).to_ulong() == 0){
@@ -281,22 +335,28 @@ int main(int argc, char *argv[]){
         }
 
         vector<bitset<8>> bitsetVec;
-
+        bool goodLine = false;
         for(int word_number = 1; word_number < vBuf.size()+1; word_number++){
           bitset<8> set(vBuf[word_number-1]);
           bitsetVec.push_back(set);
+          cout.fill('0');
           cout.width(2);
-          std::cout << std::hex << set.to_ulong() << ' ';
           if(word_number % 10 == 0){
-            wordHandler(word_number/10-1, line_number, bitsetVec);
+            for(int i = 0; i < bitsetVec.size(); i++) if(bitsetVec.at(i) != 0) goodLine = true;
+            if(!goodLine){bitsetVec.clear(); continue;}
+            else goodLine = false;
+            if(!MSDpacket) for(int i = bitsetVec.size()-1; i > -1; i--){cout.width(2); cout << hex << bitsetVec.at(i).to_ulong() << " ";}
+            wordHandler(word_number/10-1, bitsetVec, MSDpacket, lane0data, lane1data, lane2data);
             bitsetVec.clear();
-            cout << endl;
+            if(!MSDpacket) cout << endl;
           }
         }
-        if( ((bitset<8>)vBuf[vBuf.size()-1]).to_ulong() == sensor) cout << endl;
       }
-      cout << endl;
       line_number++;
+      if(!MSDpacket && lane0data.size() != 0){ cout << "Lane 0:" << endl; readMSD(lane0data); cout << endl << endl; }
+      if(!MSDpacket && lane1data.size() != 0){ cout << "Lane 1:" << endl; readMSD(lane1data); cout << endl << endl; }
+      if(!MSDpacket && lane2data.size() != 0){ cout << "Lane 2:" << endl; readMSD(lane2data); cout << endl; }
+      if(!MSDpacket && lane0data.size() != 0){cout << endl; lane0data.clear(); lane1data.clear(); lane2data.clear();}
     }
     binFile.close();
   }
