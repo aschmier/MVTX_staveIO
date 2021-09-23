@@ -16,3 +16,14 @@ Example:
 
 Use a raw data file as input.
 Please feel free to email me with any questions or issues.
+
+
+Disclaimer:
+This is still not a "polished" version. I'm working on the following:
+1. Including a make file instead of running with a bash script
+2. Running with Valgrind to check for memory issues
+3. Streamlining string-related translation methods
+4. Making the "wordHandler" and "readMSD" functions their own macros
+   so they can be run externally
+
+Please feel free to send an email with any recommendations
