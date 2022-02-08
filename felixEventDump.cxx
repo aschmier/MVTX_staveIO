@@ -157,7 +157,7 @@ void wordHandler(int word_number, vector<bitset<8>> vec, bool& MSDpacket, vector
     stringstream active_lanes;
 
     IHW_id       << hex << vec[9].to_ulong();
-    active_lanes << vec[1] + vec[0];
+    active_lanes << vec[1] << vec[0];
 
     cout << "IHW_id: "       << IHW_id.str() << " // ";
     cout << "active_lanes: " << active_lanes.str();
@@ -303,14 +303,14 @@ void wordHandler(int word_number, vector<bitset<8>> vec, bool& MSDpacket, vector
   }
 }
 
-int main(int argc, char *argv[]){
+void felixEventDump(string inputfile, int sensorIn){
   // Open the stream in binary mode
-  ifstream binFile(argv[1], std::ios::in | std::ios::binary);
+  ifstream binFile(inputfile, std::ios::in | std::ios::binary);
   int sensor;
-  if(atoi(argv[2]) == 1) sensor = 8;
-  else if(atoi(argv[2]) == 2) sensor = 16;
-  else if(atoi(argv[2]) == 3) sensor = 24;
-  else{ cout << "Invalid sensor given. Choose 1, 2, or 3." << endl; return 0; }
+  if(sensorIn == 1) sensor = 8;
+  else if(sensorIn == 2) sensor = 16;
+  else if(sensorIn == 3) sensor = 24;
+  else{ cout << "Invalid sensor given. Choose 1, 2, or 3." << endl; return; }
 
   if (binFile.is_open())
   {
@@ -363,5 +363,5 @@ int main(int argc, char *argv[]){
 
   else cout << "Unable to open file" << endl;
 
-  return 0;
+  return;
 }
