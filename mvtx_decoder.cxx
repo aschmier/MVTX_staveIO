@@ -250,16 +250,20 @@ void wordHandler(int word_number, vector<uint8_t> vec, bool& MSDpacket, vector<u
 
   // MAP Sensor Data
   if(isMSD){
-    bool newWord = false;
+    cout << "Reading chip data...";
+    bool newWord = true;
     bool chipEmpty = false;
     if(!MSDword.size()){
         MSDword.push_back(vec[0]);
     }
     for(int i=0; i<MSDword.size(); i++){
-        if(vec[0] != MSDword.at(i)) newWord = true;
-        cout << "Reading chip data...";
+        if(vec[0] == MSDword.at(i)){
+            newWord = false;
+        }
     }
-    if(newWord) MSDword.push_back(vec[0]);
+    if(newWord){
+        MSDword.push_back(vec[0]);
+    }
 
     if((vec[0]>>4) & 0xe){
         MSDpacket = true;
