@@ -92,7 +92,7 @@ void wordHandler(int word_number, vector<uint8_t> vec, bool& MSDpacket, vector<u
   }
 
   if(isRDH && word_number == 1){
-    uint16_t lhc_bc    = (vec[1]<<8) + vec[0];
+    uint16_t lhc_bc    = ((vec[1] & 0xf)<<8) + vec[0];
     uint64_t gtm_bco_1 = (vec[7]<<24) + (vec[6]<<16) + (vec[5]<<8) + vec[4];
     uint64_t gtm_bco_2 = (vec[8]);
     uint64_t gtm_bco   = (gtm_bco_2<<32) + gtm_bco_1;
@@ -109,26 +109,25 @@ void wordHandler(int word_number, vector<uint8_t> vec, bool& MSDpacket, vector<u
 
     cout << "trigger_type:";
 
-    if((trigger_type>>31) & 0x1) cout << " ORBIT";
-    if((trigger_type>>30) & 0x1) cout << " HB";
-    if((trigger_type>>29) & 0x1) cout << " HBr";
-    if((trigger_type>>28) & 0x1) cout << " HC";
-    if((trigger_type>>27) & 0x1) cout << " PhT";
-    if((trigger_type>>26) & 0x1) cout << " PP";
-    if((trigger_type>>25) & 0x1) cout << " Cal";
-    if((trigger_type>>24) & 0x1) cout << " SOT";
-    if((trigger_type>>23) & 0x1) cout << " EOT";
-    if((trigger_type>>22) & 0x1) cout << " SOC";
-    if((trigger_type>>21) & 0x1) cout << " EOC";
-    if((trigger_type>>20) & 0x1) cout << " TF";
-    if((trigger_type>>19) & 0x1) cout << " FErst";
-    if((trigger_type>>18) & 0x1) cout << " RT";
-    if((trigger_type>>17) & 0x1) cout << " RS";
-    if((trigger_type>>4)  & 0x1) cout << " LHCgap1";
-    if((trigger_type>>3)  & 0x1) cout << " LHCgap2";
-    if((trigger_type>>2)  & 0x1) cout << " TPCsync";
-    if((trigger_type>>1)  & 0x1) cout << " TPCrst";
-    if(trigger_type       & 0x1) cout << " TOF";
+    if(trigger_type        & 0x1) cout << " ORBIT";
+    if((trigger_type>>1)   & 0x1) cout << " HB";
+    if((trigger_type>>2)   & 0x1) cout << " HBr";
+    if((trigger_type>>3)   & 0x1) cout << " HC";
+    if((trigger_type>>4)   & 0x1) cout << " PhT";
+    if((trigger_type>>5)   & 0x1) cout << " PP";
+    if((trigger_type>>6)   & 0x1) cout << " Cal";
+    if((trigger_type>>7)   & 0x1) cout << " SOT";
+    if((trigger_type>>8)   & 0x1) cout << " EOT";
+    if((trigger_type>>9)   & 0x1) cout << " SOC";
+    if((trigger_type>>10)  & 0x1) cout << " EOC";
+    if((trigger_type>>11)  & 0x1) cout << " TF";
+    if((trigger_type>>12)  & 0x1) cout << " FErst";
+    if((trigger_type>>13)  & 0x1) cout << " RT";
+    if((trigger_type>>14)  & 0x1) cout << " RS";
+    if((trigger_type>>15)  & 0x1) cout << " LHCgap1";
+    if((trigger_type>>16)  & 0x1) cout << " LHCgap2";
+    if((trigger_type>>17)  & 0x1) cout << " ITSrst";
+    if((trigger_type>>18)  & 0x1) cout << " TPCrst";
 
     cout << " // ";
     cout << "pages_counter: "  << (unsigned int)pages_counter << " // ";
@@ -139,7 +138,7 @@ void wordHandler(int word_number, vector<uint8_t> vec, bool& MSDpacket, vector<u
   // ITS Header Word
   if(isIHW){
     uint8_t IHW_id        = vec[9];
-    uint16_t active_lanes = (vec[1]<<8) + vec[0];
+    uint32_t active_lanes = ((vec[3] & 0xf)<<24) + (vec[2]<<16) + (vec[1]<<8) + vec[0];
 
     cout << "IHW_id: "       << (unsigned int)IHW_id << " // ";
     cout << "active_lanes: " << (unsigned int)active_lanes;
@@ -151,48 +150,48 @@ void wordHandler(int word_number, vector<uint8_t> vec, bool& MSDpacket, vector<u
     uint64_t tdh_gtm_bco_1    = (vec[7]<<24) + (vec[6]<<16) + (vec[5]<<8) + vec[4];
     uint64_t tdh_gtm_bco_2    = vec[8];
     uint64_t tdh_gtm_bco      = (tdh_gtm_bco_2<<32) + tdh_gtm_bco_1;
-    uint16_t tdh_lhc_bc       = (vec[3]<<8) + vec[2];
-    uint8_t  tdh_status       = vec[1];
-    uint16_t tdh_trigger_type = (vec[1]<<8) + vec[0];
+    uint16_t tdh_lhc_bc       = ((vec[3] & 0xf)<<8) + vec[2];
+    uint8_t  tdh_status       = ((vec[1]>>4) & 0x7);
+    uint16_t tdh_trigger_type = ((vec[1] & 0xf)<<8) + vec[0];
 
     cout << "TDH_id: "           << (unsigned int)TDH_id      << " // ";
     cout << "tdh_gtm_bco: "      << (unsigned int)tdh_gtm_bco << " // ";
     cout << "tdh_lhc_bc: "       << (unsigned int)tdh_lhc_bc  << " // ";
 
     cout << "tdh_status:";
-    if((tdh_status>>3) & 0x1) cout << " Internal Trigger";
-    if((tdh_status>>2) & 0x1) cout << " No Data";
-    if((tdh_status>>1) & 0x1) cout << " Continuation";
+    if((tdh_status) & 0x1) cout << " Internal Trigger";
+    if((tdh_status) & 0x2) cout << " No Data";
+    if((tdh_status) & 0x4) cout << " Continuation";
     cout << " // ";
 
     cout << "tdh_trigger_type:";
-    if((tdh_trigger_type>>11) & 0x1) cout << " ORBIT";
-    if((tdh_trigger_type>>10) & 0x1) cout << " HB";
-    if((tdh_trigger_type>>9)  & 0x1) cout << " HBr";
-    if((tdh_trigger_type>>8)  & 0x1) cout << " HC";
-    if((tdh_trigger_type>>7)  & 0x1) cout << " PhT";
-    if((tdh_trigger_type>>6)  & 0x1) cout << " PP";
-    if((tdh_trigger_type>>5)  & 0x1) cout << " Cal";
-    if((tdh_trigger_type>>4)  & 0x1) cout << " SOT";
-    if((tdh_trigger_type>>3)  & 0x1) cout << " EOT";
-    if((tdh_trigger_type>>2)  & 0x1) cout << " SOC";
-    if((tdh_trigger_type>>1)  & 0x1) cout << " EOC";
-    if(tdh_trigger_type & 0x1) cout << " TF";
+    if(tdh_trigger_type       & 0x1) cout << " ORBIT";
+    if((tdh_trigger_type>>1)  & 0x1) cout << " HB";
+    if((tdh_trigger_type>>2)  & 0x1) cout << " HBr";
+    if((tdh_trigger_type>>3)  & 0x1) cout << " HC";
+    if((tdh_trigger_type>>4)  & 0x1) cout << " PhT";
+    if((tdh_trigger_type>>5)  & 0x1) cout << " PP";
+    if((tdh_trigger_type>>6)  & 0x1) cout << " Cal";
+    if((tdh_trigger_type>>7)  & 0x1) cout << " SOT";
+    if((tdh_trigger_type>>8)  & 0x1) cout << " EOT";
+    if((tdh_trigger_type>>9)  & 0x1) cout << " SOC";
+    if((tdh_trigger_type>>10) & 0x1) cout << " EOC";
+    if((tdh_trigger_type>>11) & 0x1) cout << " TF";
   }
 
   // Trigger Data Trailer
   if(isTDT){
     uint8_t  TDT_id           = vec[9];
-    uint8_t  tdt_error         = vec[8];
+    uint8_t  tdt_error         = (vec[8] & 0xf);
     uint64_t tdt_lane_status_1 = (vec[3]<<24) + (vec[2]<<16) + (vec[1]<<8) + vec[0];
     uint64_t tdt_lane_status_2 = (vec[6]<<16) + (vec[5]<<8) + vec[4];
     uint64_t tdt_lane_status   = (tdt_lane_status_2<<32) + tdt_lane_status_1;
 
     cout << "TDT_id: "          << (unsigned int)TDT_id    << " // ";
     cout << "tdt_error: ";
-    if((tdt_error>>7) & 0x1) cout << " lane_starts_violation";
-    if((tdt_error>>5) & 0x1) cout << " transmission_timeout";
-    if((tdt_error>>4) & 0x1) cout << " packet_done";
+    if(tdt_error & 0x8) cout << " lane_starts_violation";
+    if(tdt_error & 0x2) cout << " transmission_timeout";
+    if(tdt_error & 0x1) cout << " packet_done";
     cout << " // ";
 
     cout << "tdt_lane_status: ";
@@ -209,18 +208,18 @@ void wordHandler(int word_number, vector<uint8_t> vec, bool& MSDpacket, vector<u
   // Diagnostic Data Word
   if(isDDW){
     uint8_t  DDW_id            = vec[9];
-    uint8_t  ddw_index         = vec[8];
-    uint8_t  ddw_error         = vec[8];
+    uint8_t  ddw_index         = ((vec[8]>>4) & 0xf);
+    uint8_t  ddw_error         = ((vec[8]>>1) & 0x7);
     uint64_t ddw_lane_status_1 = (vec[3]<<24) + (vec[2]<<16) + (vec[1]<<8) + vec[0];
     uint64_t ddw_lane_status_2 = (vec[6]<<16) + (vec[5]<<8) + vec[4];
     uint64_t ddw_lane_status   = (ddw_lane_status_2<<32) + ddw_lane_status_1;
 
     cout << "DDW_id: "          << (unsigned int)DDW_id                << " // ";
-    cout << "ddw_index: "       << (unsigned int)(ddw_index>>4) << " // ";
+    cout << "ddw_index: "       << (unsigned int)ddw_index << " // ";
 
-    cout << "ddw_error: "       << (ddw_error & 0x16);
-    if(ddw_error & 0x1) cout << " lane_starts_violation";
-    if((ddw_error>>2)  & 0x1) cout << " transmission_timeout";
+    cout << "ddw_error: "       << (unsigned int)ddw_error;
+    if(ddw_error & 0x4) cout << " lane_starts_violation";
+    if(ddw_error & 0x1) cout << " transmission_timeout";
     cout << " // ";
 
     cout << "ddw_lane_status: ";
